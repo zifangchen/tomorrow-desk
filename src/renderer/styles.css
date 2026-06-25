@@ -1,0 +1,180 @@
+:root {
+  --black: #080806;
+  --panel: #11100c;
+  --panel-soft: #17150f;
+  --gold: #d8b45d;
+  --gold-soft: #f0d891;
+  --gold-muted: #8f7741;
+  --text: #f5edda;
+  --muted: #a79b80;
+  --danger: #ffb3a7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--black);
+  color: var(--text);
+  font-family: "Segoe UI", "Microsoft YaHei UI", Arial, sans-serif;
+}
+
+body {
+  border: 1px solid rgba(216, 180, 93, 0.55);
+}
+
+.app-shell {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  height: 100vh;
+  min-width: 360px;
+  background:
+    linear-gradient(180deg, rgba(216, 180, 93, 0.08), transparent 36%),
+    var(--black);
+}
+
+.titlebar {
+  -webkit-app-region: drag;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid rgba(216, 180, 93, 0.22);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(216, 180, 93, 0.7);
+  border-radius: 8px;
+  color: var(--gold-soft);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: rgba(216, 180, 93, 0.08);
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+h1 {
+  color: var(--gold-soft);
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.brand p {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.window-actions {
+  -webkit-app-region: no-drag;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+button {
+  font: inherit;
+}
+
+.icon-button,
+.archive-button {
+  border: 1px solid rgba(216, 180, 93, 0.32);
+  border-radius: 8px;
+  color: var(--text);
+  background: rgba(216, 180, 93, 0.08);
+  cursor: pointer;
+}
+
+.icon-button {
+  min-width: 36px;
+  height: 30px;
+  padding: 0 8px;
+  font-size: 11px;
+}
+
+.icon-button.is-active {
+  color: var(--black);
+  border-color: var(--gold-soft);
+  background: var(--gold);
+}
+
+.icon-button:hover,
+.archive-button:hover {
+  border-color: var(--gold-soft);
+}
+
+.error-banner {
+  margin: 12px 18px 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 179, 167, 0.45);
+  border-radius: 8px;
+  color: var(--danger);
+  background: rgba(255, 179, 167, 0.08);
+  font-size: 13px;
+}
+
+.note-editor {
+  width: calc(100% - 36px);
+  height: calc(100% - 24px);
+  margin: 14px 18px 10px;
+  padding: 20px;
+  resize: none;
+  border: 1px solid rgba(216, 180, 93, 0.28);
+  border-radius: 8px;
+  outline: none;
+  color: var(--text);
+  background: rgba(17, 16, 12, 0.9);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.note-editor:focus {
+  border-color: rgba(240, 216, 145, 0.8);
+  box-shadow: 0 0 0 3px rgba(216, 180, 93, 0.12);
+}
+
+.note-editor::placeholder {
+  color: rgba(167, 155, 128, 0.66);
+}
+
+.statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 18px 16px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.archive-button {
+  padding: 8px 11px;
+  color: var(--gold-soft);
+}

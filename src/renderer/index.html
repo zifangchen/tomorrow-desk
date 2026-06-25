@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tomorrow Desk</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="titlebar">
+        <section class="brand">
+          <span class="brand-mark">TD</span>
+          <div>
+            <h1>Tomorrow Desk</h1>
+            <p id="todayLabel">Morning handoff</p>
+          </div>
+        </section>
+        <nav class="window-actions" aria-label="Window actions">
+          <button id="topToggle" class="icon-button" type="button" title="Toggle always on top">Top</button>
+          <button id="loginToggle" class="icon-button" type="button" title="Toggle launch at login">Login</button>
+          <button id="minimizeButton" class="icon-button" type="button" title="Minimize">_</button>
+          <button id="closeButton" class="icon-button" type="button" title="Hide to tray">x</button>
+        </nav>
+      </header>
+
+      <section id="errorBanner" class="error-banner" hidden></section>
+
+      <textarea
+        id="noteEditor"
+        class="note-editor"
+        spellcheck="true"
+        placeholder="Write the first thing your future self should see tomorrow morning..."
+      ></textarea>
+
+      <footer class="statusbar">
+        <span id="saveStatus">Loading...</span>
+        <div class="footer-actions">
+          <span id="wordCount">0 words</span>
+          <button id="archiveButton" class="archive-button" type="button">Archive and clear</button>
+        </div>
+      </footer>
+    </main>
+    <script src="./renderer.js"></script>
+  </body>
+</html>
