@@ -1,0 +1,15 @@
+{
+  "name": "tomorrow-desk",
+  "version": "0.1.0",
+  "description": "A black-and-gold desktop handoff note that floats back after login.",
+  "main": "src/main/index.js",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7"
+  }
+}
