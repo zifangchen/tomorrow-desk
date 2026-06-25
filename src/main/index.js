@@ -10,6 +10,7 @@ const {
 } = require("electron");
 const { createStorage } = require("./storage");
 const { createPreferencesStore } = require("./preferences");
+const { archiveNoteFromMain, createTrayIcon } = require("./shell");
 
 let mainWindow = null;
 let tray = null;
@@ -57,16 +58,11 @@ function showWindow() {
 }
 
 async function archiveFromMain() {
-  const result = await storage.archiveNote(new Date());
-  await preferencesStore.save({ lastArchiveAt: new Date().toISOString() });
-  if (mainWindow) {
-    mainWindow.webContents.send("note:archived", result);
-  }
-  return result;
+  return archiveNoteFromMain({ storage, preferencesStore, mainWindow });
 }
 
 function createTray() {
-  const image = nativeImage.createEmpty();
+  const image = createTrayIcon(nativeImage);
   tray = new Tray(image);
   tray.setToolTip("Tomorrow Desk");
   tray.setContextMenu(

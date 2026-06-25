@@ -27,3 +27,13 @@
 - Any issues or concerns
   - No automated test failures or syntax issues were found.
   - Electron runtime behavior was not smoke-tested in this task because the renderer files owned by Task 5 are not present yet.
+
+## Review Fix Addendum
+
+- Fixed the archive flow so `storage.archiveNote()` remains the source of truth for whether the active note is cleared. After a successful archive, `lastArchiveAt` is now saved on a best-effort basis; save failures are logged with `console.error` and no longer turn the archive action into a rejected operation.
+- Added a focused regression test for the case where archiving succeeds but the preference save fails, plus a guard test proving no preference save or renderer notification happens when `storage.archiveNote()` itself rejects.
+- Replaced the invisible `nativeImage.createEmpty()` tray image with a small PNG-backed tray icon generated in code and used only by Task 4's main-process tray setup.
+- Re-ran verification after the fix:
+  - `npm test`: passed with 11 tests passed and 0 failed.
+  - `node -c src/main/index.js`: passed with exit code 0.
+  - `node -c src/preload.js`: passed with exit code 0.
