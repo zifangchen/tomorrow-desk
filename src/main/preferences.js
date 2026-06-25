@@ -100,5 +100,4 @@ function createPreferencesStore(baseDir) {
 module.exports = {
   DEFAULT_PREFERENCES,
   createPreferencesStore,
-  normalizePreferences,
 };

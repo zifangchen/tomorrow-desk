@@ -32,4 +32,13 @@
 
 - Any issues or concerns
   - No functional issues found in focused or full test runs.
-  - The repo still has unrelated untracked `.superpowers/sdd/*` files in git status from the existing workspace state, but I did not touch them.
+- The repo still has unrelated untracked `.superpowers/sdd/*` files in git status from the existing workspace state, but I did not touch them.
+
+## Review follow-up
+
+- Added a regression test that exercises a full preference save followed by `save({ bounds: { x: 99 } })`, and it confirms the store preserves the prior `width`, `height`, and `y` values while updating only `x`.
+- The new test passed immediately, so this is a characterization test for behavior that was already present in the implementation.
+- Removed `normalizePreferences` from the module exports so the public API is limited to `DEFAULT_PREFERENCES` and `createPreferencesStore`.
+- Verification rerun:
+  - `npm test -- test/preferences.test.js` passed.
+  - `npm test` passed.

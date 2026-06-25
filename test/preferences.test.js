@@ -35,6 +35,22 @@ test("save merges preferences and persists them", async () => {
   assert.deepEqual(await store.load(), saved);
 });
 
+test("save preserves existing bounds fields when only one field is updated", async () => {
+  const dir = await tempDir();
+  const store = createPreferencesStore(dir);
+
+  const firstSave = await store.save({
+    bounds: { width: 600, height: 700, x: 20, y: 30 },
+  });
+  const secondSave = await store.save({
+    bounds: { x: 99 },
+  });
+
+  assert.deepEqual(firstSave.bounds, { width: 600, height: 700, x: 20, y: 30 });
+  assert.deepEqual(secondSave.bounds, { width: 600, height: 700, x: 99, y: 30 });
+  assert.deepEqual(await store.load(), secondSave);
+});
+
 test("load falls back to defaults when preferences JSON is corrupt", async () => {
   const dir = await tempDir();
   await fs.mkdir(dir, { recursive: true });
