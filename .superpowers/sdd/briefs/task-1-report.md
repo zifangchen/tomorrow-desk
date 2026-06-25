@@ -52,3 +52,12 @@
 - Ran `npm test`.
   - Result: exit code 0.
   - Output reported 0 tests, 0 suites, and no failures.
+
+## Re-review fix for Electron payload
+
+- Confirmed `node_modules\electron\dist\electron.exe` was missing even though `node_modules\.bin\electron.cmd` existed.
+- Re-ran `node node_modules/electron/install.js` to inspect the package state. The script did not restore the executable, and a forced cache-bypass attempt hit a transient `ECONNRESET`.
+- Inspected Electron's local cache at `C:\Users\Administrator\AppData\Local\electron\Cache\...` and confirmed the cached `electron-v31.7.7-win32-x64.zip` was present and contained the expected `electron.exe` payload.
+- Manually unpacked the cached archive into `node_modules\electron\dist` and restored `node_modules\electron\path.txt` with `electron.exe`.
+- Verified the shared harness entrypoint with `node_modules\.bin\electron.cmd --version` returning `v31.7.7`.
+- Re-ran `npm test` successfully.
