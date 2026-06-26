@@ -4,6 +4,7 @@ const test = require("node:test");
 const {
   archiveNoteFromMain,
   createTrayIcon,
+  resolveWindowBounds,
   TRAY_ICON_DATA_URL,
 } = require("../src/main/shell");
 
@@ -103,4 +104,30 @@ test("createTrayIcon builds a visible PNG-backed tray image", () => {
   const pngBytes = Buffer.from(calls[0].split(",")[1], "base64");
   assert.equal(pngBytes.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
   assert.ok(pngBytes.length > 100);
+});
+
+test("resolveWindowBounds keeps restored windows inside the work area", () => {
+  const bounds = resolveWindowBounds(
+    {
+      bounds: {
+        width: 520,
+        height: 640,
+        x: 2008,
+        y: 48,
+      },
+    },
+    {
+      x: 0,
+      y: 0,
+      width: 2048,
+      height: 1152,
+    }
+  );
+
+  assert.deepEqual(bounds, {
+    width: 520,
+    height: 640,
+    x: 1496,
+    y: 48,
+  });
 });

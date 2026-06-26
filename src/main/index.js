@@ -10,7 +10,11 @@ const {
 } = require("electron");
 const { createStorage } = require("./storage");
 const { createPreferencesStore } = require("./preferences");
-const { archiveNoteFromMain, createTrayIcon } = require("./shell");
+const {
+  archiveNoteFromMain,
+  createTrayIcon,
+  resolveWindowBounds,
+} = require("./shell");
 
 let mainWindow = null;
 let tray = null;
@@ -20,17 +24,7 @@ let preferencesStore = null;
 
 function defaultBounds(preferences) {
   const display = screen.getPrimaryDisplay();
-  const workArea = display.workArea;
-  const width = preferences.bounds.width;
-  const height = preferences.bounds.height;
-  const x = Number.isFinite(preferences.bounds.x)
-    ? preferences.bounds.x
-    : Math.round(workArea.x + workArea.width - width - 32);
-  const y = Number.isFinite(preferences.bounds.y)
-    ? preferences.bounds.y
-    : Math.round(workArea.y + 48);
-
-  return { width, height, x, y };
+  return resolveWindowBounds(preferences, display.workArea);
 }
 
 async function applyLaunchAtLogin(enabled) {
@@ -104,8 +98,8 @@ async function createWindow() {
     },
   });
 
-  await mainWindow.loadFile(path.join(__dirname, "..", "renderer", "index.html"));
   mainWindow.once("ready-to-show", showWindow);
+  await mainWindow.loadFile(path.join(__dirname, "..", "renderer", "index.html"));
 
   mainWindow.on("close", async (event) => {
     if (isQuitting) {
