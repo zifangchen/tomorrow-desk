@@ -11,9 +11,11 @@ const {
 const { createStorage } = require("./storage");
 const { createPreferencesStore } = require("./preferences");
 const {
+  archiveAfterRendererFlush,
   archiveNoteFromMain,
   createTrayIcon,
   finishRendererFlush,
+  quitAfterRendererFlush,
   requestRendererFlush,
   resolveWindowBounds,
 } = require("./shell");
@@ -62,6 +64,28 @@ function flushRendererNote() {
   return requestRendererFlush({ mainWindow, pendingFlushes });
 }
 
+function setQuitting(value) {
+  isQuitting = value;
+}
+
+function quitApp() {
+  app.quit();
+}
+
+function quitSafely() {
+  return quitAfterRendererFlush({
+    flushRendererNote,
+    saveWindowBounds,
+    setQuitting,
+    quit: quitApp,
+    showWindow,
+  });
+}
+
+function archiveSafely() {
+  return archiveAfterRendererFlush({ flushRendererNote, archiveFromMain });
+}
+
 function createTray() {
   const image = createTrayIcon(nativeImage);
   tray = new Tray(image);
@@ -69,21 +93,11 @@ function createTray() {
   tray.setContextMenu(
     Menu.buildFromTemplate([
       { label: "Show", click: showWindow },
-      { label: "Archive", click: () => archiveFromMain().catch(console.error) },
+      { label: "Archive", click: () => archiveSafely().catch(console.error) },
       { type: "separator" },
       {
         label: "Quit",
-        click: async () => {
-          try {
-            await flushRendererNote();
-            isQuitting = true;
-            await saveWindowBounds();
-            app.quit();
-          } catch (error) {
-            console.error(error);
-            showWindow();
-          }
-        },
+        click: quitSafely,
       },
     ])
   );
@@ -188,8 +202,13 @@ app.whenReady().then(async () => {
   await createWindow();
 });
 
-app.on("before-quit", () => {
-  isQuitting = true;
+app.on("before-quit", (event) => {
+  if (isQuitting) {
+    return;
+  }
+
+  event.preventDefault();
+  quitSafely().catch(console.error);
 });
 
 app.on("activate", () => {

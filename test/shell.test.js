@@ -2,9 +2,11 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 
 const {
+  archiveAfterRendererFlush,
   archiveNoteFromMain,
   createTrayIcon,
   finishRendererFlush,
+  quitAfterRendererFlush,
   requestRendererFlush,
   resolveWindowBounds,
   TRAY_ICON_DATA_URL,
@@ -184,4 +186,100 @@ test("requestRendererFlush rejects when renderer reports a failed save", async (
     true
   );
   await assert.rejects(flush, /disk full/);
+});
+
+test("archiveAfterRendererFlush flushes pending renderer edits before archiving", async () => {
+  const calls = [];
+
+  const result = await archiveAfterRendererFlush({
+    flushRendererNote: async () => {
+      calls.push("flush");
+    },
+    archiveFromMain: async () => {
+      calls.push("archive");
+      return { archivedPath: "archive.md", archivedContent: "fresh text" };
+    },
+  });
+
+  assert.deepEqual(calls, ["flush", "archive"]);
+  assert.deepEqual(result, {
+    archivedPath: "archive.md",
+    archivedContent: "fresh text",
+  });
+});
+
+test("archiveAfterRendererFlush skips archiving if renderer flush fails", async () => {
+  const calls = [];
+
+  await assert.rejects(
+    () =>
+      archiveAfterRendererFlush({
+        flushRendererNote: async () => {
+          calls.push("flush");
+          throw new Error("save failed");
+        },
+        archiveFromMain: async () => {
+          calls.push("archive");
+        },
+      }),
+    /save failed/
+  );
+
+  assert.deepEqual(calls, ["flush"]);
+});
+
+test("quitAfterRendererFlush saves before marking app as quitting", async () => {
+  const calls = [];
+
+  await quitAfterRendererFlush({
+    flushRendererNote: async () => {
+      calls.push("flush");
+    },
+    saveWindowBounds: async () => {
+      calls.push("bounds");
+    },
+    setQuitting: (value) => {
+      calls.push(`quitting:${value}`);
+    },
+    quit: () => {
+      calls.push("quit");
+    },
+    showWindow: () => {
+      calls.push("show");
+    },
+  });
+
+  assert.deepEqual(calls, ["flush", "quitting:true", "bounds", "quit"]);
+});
+
+test("quitAfterRendererFlush keeps app open if renderer flush fails", async () => {
+  const calls = [];
+  const logged = [];
+
+  await quitAfterRendererFlush({
+    flushRendererNote: async () => {
+      calls.push("flush");
+      throw new Error("save failed");
+    },
+    saveWindowBounds: async () => {
+      calls.push("bounds");
+    },
+    setQuitting: (value) => {
+      calls.push(`quitting:${value}`);
+    },
+    quit: () => {
+      calls.push("quit");
+    },
+    showWindow: () => {
+      calls.push("show");
+    },
+    logger: {
+      error: (error) => {
+        logged.push(error.message);
+      },
+    },
+  });
+
+  assert.deepEqual(calls, ["flush", "show"]);
+  assert.deepEqual(logged, ["save failed"]);
 });

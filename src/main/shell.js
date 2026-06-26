@@ -93,10 +93,36 @@ function finishRendererFlush(pendingFlushes, requestId, result) {
   return true;
 }
 
+async function archiveAfterRendererFlush({ flushRendererNote, archiveFromMain }) {
+  await flushRendererNote();
+  return archiveFromMain();
+}
+
+async function quitAfterRendererFlush({
+  flushRendererNote,
+  saveWindowBounds,
+  setQuitting,
+  quit,
+  showWindow,
+  logger = console,
+}) {
+  try {
+    await flushRendererNote();
+    setQuitting(true);
+    await saveWindowBounds();
+    quit();
+  } catch (error) {
+    logger.error(error);
+    showWindow();
+  }
+}
+
 module.exports = {
+  archiveAfterRendererFlush,
   archiveNoteFromMain,
   createTrayIcon,
   finishRendererFlush,
+  quitAfterRendererFlush,
   requestRendererFlush,
   resolveWindowBounds,
   TRAY_ICON_DATA_URL,
