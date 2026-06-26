@@ -1,5 +1,6 @@
 const TRAY_ICON_DATA_URL =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAxSURBVDhPY+DgYPtPCWZAFyAVww04udiTJDzIDYCJoWNsakYNoJUBxOBBaAC5mGIDAJ2dxCSlxNxbAAAAAElFTkSuQmCC";
+let nextFlushId = 1;
 
 async function archiveNoteFromMain({
   storage,
@@ -53,9 +54,50 @@ function resolveWindowBounds(preferences, workArea) {
   };
 }
 
+function requestRendererFlush({
+  mainWindow,
+  pendingFlushes,
+  timeoutMs = 5000,
+  requestId = `flush-${nextFlushId++}`,
+}) {
+  if (!mainWindow || (mainWindow.isDestroyed && mainWindow.isDestroyed())) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      pendingFlushes.delete(requestId);
+      reject(new Error("Timed out waiting for renderer flush"));
+    }, timeoutMs);
+
+    pendingFlushes.set(requestId, { resolve, reject, timer });
+    mainWindow.webContents.send("note:flush-request", { requestId });
+  });
+}
+
+function finishRendererFlush(pendingFlushes, requestId, result) {
+  const pending = pendingFlushes.get(requestId);
+  if (!pending) {
+    return false;
+  }
+
+  clearTimeout(pending.timer);
+  pendingFlushes.delete(requestId);
+
+  if (result && result.ok) {
+    pending.resolve();
+  } else {
+    pending.reject(new Error((result && result.error) || "Renderer flush failed"));
+  }
+
+  return true;
+}
+
 module.exports = {
   archiveNoteFromMain,
   createTrayIcon,
+  finishRendererFlush,
+  requestRendererFlush,
   resolveWindowBounds,
   TRAY_ICON_DATA_URL,
 };

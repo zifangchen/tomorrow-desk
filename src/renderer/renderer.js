@@ -58,6 +58,7 @@ async function saveNow() {
   } catch (error) {
     showError("Could not save. Keep this window open and try again.");
     setStatus("Save failed");
+    throw error;
   }
 }
 
@@ -143,8 +144,12 @@ minimizeButton.addEventListener("click", () => {
 });
 
 closeButton.addEventListener("click", async () => {
-  await saveNow();
-  window.tomorrowDesk.hideToTray();
+  try {
+    await saveNow();
+    await window.tomorrowDesk.hideToTray();
+  } catch (error) {
+    showError("Could not save. Keep this window open and try again.");
+  }
 });
 
 window.addEventListener("tomorrow-desk:note-archived", () => {
@@ -155,6 +160,19 @@ window.addEventListener("tomorrow-desk:note-archived", () => {
   updateWordCount();
   clearError();
   setStatus("Archived");
+});
+
+window.addEventListener("tomorrow-desk:flush-request", async (event) => {
+  const requestId = event.detail && event.detail.requestId;
+  try {
+    await saveNow();
+    await window.tomorrowDesk.completeFlush(requestId, { ok: true });
+  } catch (error) {
+    await window.tomorrowDesk.completeFlush(requestId, {
+      ok: false,
+      error: error.message || "Save failed",
+    });
+  }
 });
 
 window.addEventListener("beforeunload", () => {

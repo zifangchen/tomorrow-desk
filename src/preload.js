@@ -6,6 +6,12 @@ ipcRenderer.on("note:archived", (_event, archivedNote) => {
   );
 });
 
+ipcRenderer.on("note:flush-request", (_event, request) => {
+  window.dispatchEvent(
+    new CustomEvent("tomorrow-desk:flush-request", { detail: request })
+  );
+});
+
 contextBridge.exposeInMainWorld("tomorrowDesk", {
   loadNote: () => ipcRenderer.invoke("note:load"),
   saveNote: (content) => ipcRenderer.invoke("note:save", content),
@@ -17,4 +23,6 @@ contextBridge.exposeInMainWorld("tomorrowDesk", {
     ipcRenderer.invoke("preferences:setLaunchAtLogin", enabled),
   minimize: () => ipcRenderer.invoke("window:minimize"),
   hideToTray: () => ipcRenderer.invoke("window:hideToTray"),
+  completeFlush: (requestId, result) =>
+    ipcRenderer.invoke("note:flush-complete", requestId, result),
 });

@@ -13,6 +13,8 @@ const { createPreferencesStore } = require("./preferences");
 const {
   archiveNoteFromMain,
   createTrayIcon,
+  finishRendererFlush,
+  requestRendererFlush,
   resolveWindowBounds,
 } = require("./shell");
 
@@ -21,6 +23,7 @@ let tray = null;
 let isQuitting = false;
 let storage = null;
 let preferencesStore = null;
+const pendingFlushes = new Map();
 
 function defaultBounds(preferences) {
   const display = screen.getPrimaryDisplay();
@@ -55,6 +58,10 @@ async function archiveFromMain() {
   return archiveNoteFromMain({ storage, preferencesStore, mainWindow });
 }
 
+function flushRendererNote() {
+  return requestRendererFlush({ mainWindow, pendingFlushes });
+}
+
 function createTray() {
   const image = createTrayIcon(nativeImage);
   tray = new Tray(image);
@@ -67,9 +74,15 @@ function createTray() {
       {
         label: "Quit",
         click: async () => {
-          isQuitting = true;
-          await saveWindowBounds();
-          app.quit();
+          try {
+            await flushRendererNote();
+            isQuitting = true;
+            await saveWindowBounds();
+            app.quit();
+          } catch (error) {
+            console.error(error);
+            showWindow();
+          }
         },
       },
     ])
@@ -108,8 +121,14 @@ async function createWindow() {
     }
 
     event.preventDefault();
-    await saveWindowBounds();
-    mainWindow.hide();
+    try {
+      await flushRendererNote();
+      await saveWindowBounds();
+      mainWindow.hide();
+    } catch (error) {
+      console.error(error);
+      showWindow();
+    }
   });
 
   mainWindow.on("resize", () => {
@@ -126,6 +145,9 @@ function registerIpcHandlers() {
     storage.writeNote(String(content ?? ""))
   );
   ipcMain.handle("note:archive", () => archiveFromMain());
+  ipcMain.handle("note:flush-complete", (_event, requestId, result) =>
+    finishRendererFlush(pendingFlushes, requestId, result)
+  );
   ipcMain.handle("preferences:get", () => preferencesStore.load());
   ipcMain.handle("preferences:setAlwaysOnTop", async (_event, enabled) => {
     const next = await preferencesStore.save({ alwaysOnTop: Boolean(enabled) });
@@ -145,6 +167,7 @@ function registerIpcHandlers() {
     }
   });
   ipcMain.handle("window:hideToTray", async () => {
+    await flushRendererNote();
     await saveWindowBounds();
     if (mainWindow) {
       mainWindow.hide();

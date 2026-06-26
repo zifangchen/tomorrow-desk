@@ -4,6 +4,8 @@ const test = require("node:test");
 const {
   archiveNoteFromMain,
   createTrayIcon,
+  finishRendererFlush,
+  requestRendererFlush,
   resolveWindowBounds,
   TRAY_ICON_DATA_URL,
 } = require("../src/main/shell");
@@ -130,4 +132,56 @@ test("resolveWindowBounds keeps restored windows inside the work area", () => {
     x: 1496,
     y: 48,
   });
+});
+
+test("requestRendererFlush resolves when renderer reports a successful save", async () => {
+  const sent = [];
+  const pendingFlushes = new Map();
+  const mainWindow = {
+    isDestroyed: () => false,
+    webContents: {
+      send: (channel, payload) => {
+        sent.push({ channel, payload });
+      },
+    },
+  };
+
+  const flush = requestRendererFlush({
+    mainWindow,
+    pendingFlushes,
+    requestId: "flush-ok",
+    timeoutMs: 1000,
+  });
+
+  assert.deepEqual(sent, [
+    { channel: "note:flush-request", payload: { requestId: "flush-ok" } },
+  ]);
+  assert.equal(finishRendererFlush(pendingFlushes, "flush-ok", { ok: true }), true);
+  await flush;
+});
+
+test("requestRendererFlush rejects when renderer reports a failed save", async () => {
+  const pendingFlushes = new Map();
+  const mainWindow = {
+    isDestroyed: () => false,
+    webContents: {
+      send: () => {},
+    },
+  };
+
+  const flush = requestRendererFlush({
+    mainWindow,
+    pendingFlushes,
+    requestId: "flush-fail",
+    timeoutMs: 1000,
+  });
+
+  assert.equal(
+    finishRendererFlush(pendingFlushes, "flush-fail", {
+      ok: false,
+      error: "disk full",
+    }),
+    true
+  );
+  await assert.rejects(flush, /disk full/);
 });

@@ -55,6 +55,7 @@ test("preload exposes the planned renderer API", () => {
 
   assert.deepEqual(Object.keys(exposed.tomorrowDesk).sort(), [
     "archiveNote",
+    "completeFlush",
     "getPreferences",
     "hideToTray",
     "loadNote",
@@ -63,6 +64,19 @@ test("preload exposes the planned renderer API", () => {
     "setAlwaysOnTop",
     "setLaunchAtLogin",
   ]);
+});
+
+test("preload forwards flush requests to the renderer window", () => {
+  const { ipcHandlers, dispatched } = runPreload();
+
+  const handler = ipcHandlers.get("note:flush-request");
+  assert.equal(typeof handler, "function");
+
+  handler({}, { requestId: "flush-1" });
+
+  assert.equal(dispatched.length, 1);
+  assert.equal(dispatched[0].type, "tomorrow-desk:flush-request");
+  assert.deepEqual(dispatched[0].detail, { requestId: "flush-1" });
 });
 
 test("preload forwards note archive events to the renderer window", () => {
