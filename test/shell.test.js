@@ -280,6 +280,38 @@ test("quitAfterRendererFlush keeps app open if renderer flush fails", async () =
     },
   });
 
-  assert.deepEqual(calls, ["flush", "show"]);
+  assert.deepEqual(calls, ["flush", "quitting:false", "show"]);
   assert.deepEqual(logged, ["save failed"]);
+});
+
+test("quitAfterRendererFlush clears quitting state if bounds save fails", async () => {
+  const calls = [];
+  const logged = [];
+
+  await quitAfterRendererFlush({
+    flushRendererNote: async () => {
+      calls.push("flush");
+    },
+    saveWindowBounds: async () => {
+      calls.push("bounds");
+      throw new Error("bounds failed");
+    },
+    setQuitting: (value) => {
+      calls.push(`quitting:${value}`);
+    },
+    quit: () => {
+      calls.push("quit");
+    },
+    showWindow: () => {
+      calls.push("show");
+    },
+    logger: {
+      error: (error) => {
+        logged.push(error.message);
+      },
+    },
+  });
+
+  assert.deepEqual(calls, ["flush", "quitting:true", "bounds", "quitting:false", "show"]);
+  assert.deepEqual(logged, ["bounds failed"]);
 });

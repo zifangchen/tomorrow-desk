@@ -112,6 +112,7 @@ async function quitAfterRendererFlush({
     await saveWindowBounds();
     quit();
   } catch (error) {
+    setQuitting(false);
     logger.error(error);
     showWindow();
   }
