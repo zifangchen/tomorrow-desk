@@ -147,6 +147,16 @@ closeButton.addEventListener("click", async () => {
   window.tomorrowDesk.hideToTray();
 });
 
+window.addEventListener("tomorrow-desk:note-archived", () => {
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  editor.value = "";
+  lastSavedContent = "";
+  updateWordCount();
+  clearError();
+  setStatus("Archived");
+});
+
 window.addEventListener("beforeunload", () => {
   if (saveTimer) {
     window.tomorrowDesk.saveNote(editor.value);

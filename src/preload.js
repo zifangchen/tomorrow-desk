@@ -1,5 +1,11 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
+ipcRenderer.on("note:archived", (_event, archivedNote) => {
+  window.dispatchEvent(
+    new CustomEvent("tomorrow-desk:note-archived", { detail: archivedNote })
+  );
+});
+
 contextBridge.exposeInMainWorld("tomorrowDesk", {
   loadNote: () => ipcRenderer.invoke("note:load"),
   saveNote: (content) => ipcRenderer.invoke("note:save", content),
