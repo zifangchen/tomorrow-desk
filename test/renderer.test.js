@@ -47,6 +47,7 @@ async function runRenderer(overrides = {}) {
   const elements = new Map([
     [".app-shell", makeElement()],
     ["#noteEditor", makeElement()],
+    ["#linkInput", makeElement()],
     ["#saveStatus", makeElement()],
     ["#wordCount", makeElement()],
     ["#archiveButton", makeElement()],
@@ -201,6 +202,27 @@ test("renderer commits Enter input as a saved task item below the editor", async
   assert.match(savedNotes.at(-1), /- 完成论文初稿/);
 });
 
+test("renderer commits an optional related link as a clickable task link", async () => {
+  const { elements, savedNotes } = await runRenderer({ loadNote: async () => "" });
+  const editor = elements.get("#noteEditor");
+  const linkInput = elements.get("#linkInput");
+  const taskList = elements.get("#taskList");
+
+  editor.value = "Read the project page";
+  linkInput.value = "example.com";
+  await editor.handlers.keydown({
+    key: "Enter",
+    shiftKey: false,
+    preventDefault() {},
+  });
+
+  assert.equal(editor.value, "");
+  assert.equal(linkInput.value, "");
+  assert.match(taskList.innerHTML, /href="https:\/\/example\.com"/);
+  assert.match(taskList.innerHTML, /target="_blank"/);
+  assert.match(savedNotes.at(-1), /相关链接: \[example\.com\]\(https:\/\/example\.com\)/);
+});
+
 test("renderer deletes one saved task without clearing the others", async () => {
   const { elements, savedNotes } = await runRenderer({ loadNote: async () => "" });
   const editor = elements.get("#noteEditor");
@@ -265,7 +287,7 @@ test("renderer focuses editor when the writing background is clicked", async () 
   appShell.handlers.click({
     target: {
       closest(selector) {
-        assert.equal(selector, "button, textarea, .titlebar");
+        assert.equal(selector, "button, textarea, input, .titlebar");
         return null;
       },
     },
@@ -290,8 +312,10 @@ test("renderer cycles through visual themes from the title bar", async () => {
 test("renderer saves pending text before acknowledging a main-process flush request", async () => {
   const { elements, windowHandlers, savedNotes, completedFlushes } = await runRenderer();
   const editor = elements.get("#noteEditor");
+  const linkInput = elements.get("#linkInput");
 
   editor.value = "Flush this before quitting";
+  linkInput.value = "https://example.com/reference";
   editor.handlers.input();
   await windowHandlers["tomorrow-desk:flush-request"]({
     detail: { requestId: "flush-1" },
@@ -300,6 +324,8 @@ test("renderer saves pending text before acknowledging a main-process flush requ
   assert.equal(savedNotes.length, 1);
   assert.match(savedNotes[0], /## 当前输入/);
   assert.match(savedNotes[0], /Flush this before quitting/);
+  assert.match(savedNotes[0], /## 相关链接/);
+  assert.match(savedNotes[0], /https:\/\/example\.com\/reference/);
   assert.equal(completedFlushes.length, 1);
   assert.equal(completedFlushes[0].requestId, "flush-1");
   assert.equal(completedFlushes[0].result.ok, true);

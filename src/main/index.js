@@ -7,6 +7,7 @@ const {
   ipcMain,
   screen,
   nativeImage,
+  shell,
 } = require("electron");
 const { createStorage } = require("./storage");
 const { createPreferencesStore } = require("./preferences");
@@ -126,6 +127,13 @@ async function createWindow() {
   });
 
   mainWindow.once("ready-to-show", showWindow);
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^https?:\/\//i.test(url)) {
+      shell.openExternal(url);
+    }
+
+    return { action: "deny" };
+  });
   await mainWindow.loadFile(path.join(__dirname, "..", "renderer", "index.html"));
 
   mainWindow.on("close", async (event) => {
