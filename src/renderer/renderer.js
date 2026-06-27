@@ -67,7 +67,20 @@ function normalizeTaskItem(value) {
 function renderTaskList() {
   taskList.textContent = taskItems.join("\n");
   taskList.innerHTML = taskItems
-    .map((item) => `<li>${escapeHtml(item).replace(/\n/g, "<br>")}</li>`)
+    .map(
+      (item, index) => `
+        <li>
+          <span class="task-item-text">${escapeHtml(item).replace(/\n/g, "<br>")}</span>
+          <button
+            class="task-delete-button"
+            type="button"
+            data-task-index="${index}"
+            title="删除这条任务"
+            aria-label="删除这条任务"
+          >×</button>
+        </li>
+      `
+    )
     .join("");
 }
 
@@ -231,6 +244,36 @@ editor.addEventListener("keydown", async (event) => {
     editor.value = item;
     renderTaskList();
     updateWordCount();
+    focusEditor();
+  }
+});
+
+taskList.addEventListener("click", async (event) => {
+  const deleteButton = event.target.closest(".task-delete-button");
+  if (!deleteButton) {
+    return;
+  }
+
+  const taskIndex = Number(deleteButton.dataset.taskIndex);
+  if (!Number.isInteger(taskIndex) || taskIndex < 0 || taskIndex >= taskItems.length) {
+    return;
+  }
+
+  const [removedTask] = taskItems.splice(taskIndex, 1);
+  renderTaskList();
+  clearError();
+  focusEditor();
+
+  try {
+    setStatus("Deleting...");
+    await saveNow();
+    setStatus("Deleted");
+    focusEditor();
+  } catch (error) {
+    taskItems.splice(taskIndex, 0, removedTask);
+    renderTaskList();
+    showError("Delete failed. The task was restored.");
+    setStatus("Delete failed");
     focusEditor();
   }
 });

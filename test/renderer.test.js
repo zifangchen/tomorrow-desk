@@ -198,6 +198,39 @@ test("renderer commits Enter input as a saved task item below the editor", async
   assert.match(savedNotes.at(-1), /- 完成论文初稿/);
 });
 
+test("renderer deletes one saved task without clearing the others", async () => {
+  const { elements, savedNotes } = await runRenderer({ loadNote: async () => "" });
+  const editor = elements.get("#noteEditor");
+  const taskList = elements.get("#taskList");
+
+  editor.value = "第一件事";
+  await editor.handlers.keydown({
+    key: "Enter",
+    shiftKey: false,
+    preventDefault() {},
+  });
+  editor.value = "第二件事";
+  await editor.handlers.keydown({
+    key: "Enter",
+    shiftKey: false,
+    preventDefault() {},
+  });
+
+  await taskList.handlers.click({
+    target: {
+      closest(selector) {
+        assert.equal(selector, ".task-delete-button");
+        return { dataset: { taskIndex: "0" } };
+      },
+    },
+  });
+
+  assert.doesNotMatch(taskList.textContent, /第一件事/);
+  assert.match(taskList.textContent, /第二件事/);
+  assert.doesNotMatch(savedNotes.at(-1), /第一件事/);
+  assert.match(savedNotes.at(-1), /- 第二件事/);
+});
+
 test("renderer keeps Shift+Enter available for multiline input", async () => {
   const { elements, savedNotes } = await runRenderer({ loadNote: async () => "" });
   const editor = elements.get("#noteEditor");

@@ -179,12 +179,38 @@ button {
 }
 
 .task-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
   margin: 0 0 8px;
   padding: 10px 12px;
   border: 1px solid rgba(216, 180, 93, 0.2);
   border-radius: 8px;
   background: rgba(216, 180, 93, 0.06);
   white-space: pre-wrap;
+}
+
+.task-item-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.task-delete-button {
+  width: 24px;
+  height: 24px;
+  border: 1px solid rgba(216, 180, 93, 0.3);
+  border-radius: 6px;
+  color: var(--gold-soft);
+  background: rgba(8, 8, 6, 0.42);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.task-delete-button:hover {
+  border-color: var(--gold-soft);
+  color: var(--black);
+  background: var(--gold);
 }
 
 .statusbar {
