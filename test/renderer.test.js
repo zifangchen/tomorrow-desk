@@ -35,6 +35,7 @@ function makeElement() {
       this.selectionStart = start;
       this.selectionEnd = end;
     },
+    dataset: {},
   };
 }
 
@@ -52,6 +53,7 @@ async function runRenderer(overrides = {}) {
     ["#taskList", makeElement()],
     ["#topToggle", makeElement()],
     ["#loginToggle", makeElement()],
+    ["#themeToggle", makeElement()],
     ["#minimizeButton", makeElement()],
     ["#closeButton", makeElement()],
     ["#errorBanner", makeElement()],
@@ -70,6 +72,7 @@ async function runRenderer(overrides = {}) {
 
   const sandbox = {
     document: {
+      body: makeElement(),
       querySelector(selector) {
         return elements.get(selector);
       },
@@ -269,6 +272,19 @@ test("renderer focuses editor when the writing background is clicked", async () 
   });
 
   assert.equal(editor.focused, true);
+});
+
+test("renderer cycles through visual themes from the title bar", async () => {
+  const { elements } = await runRenderer({ loadNote: async () => "" });
+  const themeToggle = elements.get("#themeToggle");
+
+  assert.equal(themeToggle.textContent, "Theme");
+  assert.equal(themeToggle.title, "Theme: Black Gold");
+
+  themeToggle.handlers.click();
+
+  assert.equal(themeToggle.textContent, "Ocean");
+  assert.equal(themeToggle.title, "Theme: Ocean Gold");
 });
 
 test("renderer saves pending text before acknowledging a main-process flush request", async () => {

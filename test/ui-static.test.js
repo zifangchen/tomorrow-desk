@@ -37,7 +37,18 @@ test("editor stretches to fill the available writing row", () => {
     "utf8"
   );
 
+  assert.match(css, /grid-template-rows:\s*auto\s+auto\s+320px\s+minmax\(0,\s*1fr\)\s+auto/s);
   assert.match(css, /\.note-editor\s*\{[^}]*height:\s*calc\(100% - 24px\)/s);
+});
+
+test("title bar exposes a theme switch button", () => {
+  const html = fs.readFileSync(
+    path.join(__dirname, "..", "src", "renderer", "index.html"),
+    "utf8"
+  );
+
+  assert.match(html, /id="themeToggle"/);
+  assert.match(html, />Theme</);
 });
 
 test("main layout pins the status bar to the bottom grid area", () => {
@@ -77,6 +88,18 @@ test("main shell includes a subtle animated gradient with reduced-motion fallbac
   assert.match(css, /@keyframes\s+aurora-drift/);
   assert.match(css, /@keyframes\s+editor-glow/);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
+});
+
+test("theme colors transition through CSS variables", () => {
+  const css = fs.readFileSync(
+    path.join(__dirname, "..", "src", "renderer", "styles.css"),
+    "utf8"
+  );
+
+  assert.match(css, /body\s*\{[^}]*transition:[^}]*background-color/s);
+  assert.match(css, /body\[data-theme="ocean"\]/);
+  assert.match(css, /body\[data-theme="forest"\]/);
+  assert.match(css, /body\[data-theme="violet"\]/);
 });
 
 test("top window symbols are visually larger than text toggles", () => {

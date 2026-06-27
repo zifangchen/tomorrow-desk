@@ -8,6 +8,56 @@
   --text: #f5edda;
   --muted: #a79b80;
   --danger: #ffb3a7;
+  --accent-rgb: 216, 180, 93;
+  --accent-soft-rgb: 240, 216, 145;
+  --accent-muted-rgb: 143, 119, 65;
+  --panel-rgb: 17, 16, 12;
+  --danger-rgb: 255, 179, 167;
+}
+
+body[data-theme="ocean"] {
+  --black: #061416;
+  --panel: #0b2025;
+  --panel-soft: #102a30;
+  --gold: #56c7bf;
+  --gold-soft: #c9fff8;
+  --gold-muted: #4f9690;
+  --text: #ecfffb;
+  --muted: #91bdb8;
+  --accent-rgb: 86, 199, 191;
+  --accent-soft-rgb: 201, 255, 248;
+  --accent-muted-rgb: 79, 150, 144;
+  --panel-rgb: 11, 32, 37;
+}
+
+body[data-theme="forest"] {
+  --black: #071109;
+  --panel: #0e1d11;
+  --panel-soft: #142917;
+  --gold: #c8b15c;
+  --gold-soft: #f4df8c;
+  --gold-muted: #7fa16b;
+  --text: #f3f8e9;
+  --muted: #a5b996;
+  --accent-rgb: 200, 177, 92;
+  --accent-soft-rgb: 244, 223, 140;
+  --accent-muted-rgb: 127, 161, 107;
+  --panel-rgb: 14, 29, 17;
+}
+
+body[data-theme="violet"] {
+  --black: #100914;
+  --panel: #1c1022;
+  --panel-soft: #27162f;
+  --gold: #c4896b;
+  --gold-soft: #ffd0b6;
+  --gold-muted: #9f75b8;
+  --text: #fbf1ff;
+  --muted: #bda8c7;
+  --accent-rgb: 196, 137, 107;
+  --accent-soft-rgb: 255, 208, 182;
+  --accent-muted-rgb: 159, 117, 184;
+  --panel-rgb: 28, 16, 34;
 }
 
 * {
@@ -26,13 +76,18 @@ body {
 }
 
 body {
-  border: 1px solid rgba(216, 180, 93, 0.55);
+  background-color: var(--black);
+  border: 1px solid rgba(var(--accent-rgb), 0.55);
+  transition:
+    background-color 700ms ease,
+    color 700ms ease,
+    border-color 700ms ease;
 }
 
 .app-shell {
   position: relative;
   display: grid;
-  grid-template-rows: auto auto minmax(150px, 1fr) auto auto;
+  grid-template-rows: auto auto 320px minmax(0, 1fr) auto;
   grid-template-areas:
     "titlebar"
     "error"
@@ -43,8 +98,14 @@ body {
   min-width: 360px;
   overflow: hidden;
   background:
-    linear-gradient(180deg, rgba(216, 180, 93, 0.1), transparent 38%),
+    linear-gradient(180deg, rgba(var(--accent-rgb), 0.1), transparent 38%),
     var(--black);
+  transition:
+    background 700ms ease,
+    background-color 700ms ease,
+    color 700ms ease,
+    border-color 700ms ease,
+    box-shadow 700ms ease;
 }
 
 .app-shell::before {
@@ -54,25 +115,28 @@ body {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 18% 18%, rgba(240, 216, 145, 0.2), transparent 25%),
-    radial-gradient(circle at 82% 72%, rgba(216, 180, 93, 0.15), transparent 28%),
+    radial-gradient(circle at 18% 18%, rgba(var(--accent-soft-rgb), 0.2), transparent 25%),
+    radial-gradient(circle at 82% 72%, rgba(var(--accent-rgb), 0.15), transparent 28%),
     linear-gradient(
       115deg,
       transparent 8%,
-      rgba(216, 180, 93, 0.18) 34%,
-      rgba(240, 216, 145, 0.08) 46%,
+      rgba(var(--accent-rgb), 0.18) 34%,
+      rgba(var(--accent-soft-rgb), 0.08) 46%,
       transparent 62%
     ),
     linear-gradient(
       245deg,
       transparent 18%,
-      rgba(143, 119, 65, 0.14) 42%,
+      rgba(var(--accent-muted-rgb), 0.14) 42%,
       transparent 64%
     );
   background-size: 140% 140%, 150% 150%, 180% 180%, 180% 180%;
   opacity: 0.92;
   transform: translate3d(-2%, -2%, 0);
   animation: aurora-drift 9s ease-in-out infinite alternate;
+  transition:
+    background 700ms ease,
+    opacity 700ms ease;
 }
 
 .app-shell > * {
@@ -100,7 +164,10 @@ body {
   justify-content: space-between;
   gap: 16px;
   padding: 18px 18px 14px;
-  border-bottom: 1px solid rgba(216, 180, 93, 0.22);
+  border-bottom: 1px solid rgba(var(--accent-rgb), 0.22);
+  transition:
+    border-color 700ms ease,
+    color 700ms ease;
 }
 
 .brand {
@@ -115,12 +182,17 @@ body {
   place-items: center;
   width: 38px;
   height: 38px;
-  border: 1px solid rgba(216, 180, 93, 0.7);
+  border: 1px solid rgba(var(--accent-rgb), 0.7);
   border-radius: 8px;
   color: var(--gold-soft);
   font-weight: 700;
   letter-spacing: 0.04em;
-  background: rgba(216, 180, 93, 0.08);
+  background: rgba(var(--accent-rgb), 0.08);
+  transition:
+    background 700ms ease,
+    border-color 700ms ease,
+    color 700ms ease,
+    box-shadow 700ms ease;
 }
 
 h1,
@@ -153,11 +225,17 @@ button {
 
 .icon-button,
 .archive-button {
-  border: 1px solid rgba(216, 180, 93, 0.32);
+  border: 1px solid rgba(var(--accent-rgb), 0.32);
   border-radius: 8px;
   color: var(--text);
-  background: rgba(216, 180, 93, 0.08);
+  background: rgba(var(--accent-rgb), 0.08);
   cursor: pointer;
+  transition:
+    background 700ms ease,
+    background-color 700ms ease,
+    border-color 700ms ease,
+    color 700ms ease,
+    box-shadow 700ms ease;
 }
 
 .icon-button {
@@ -191,10 +269,10 @@ button {
   grid-area: error;
   margin: 12px 18px 0;
   padding: 10px 12px;
-  border: 1px solid rgba(255, 179, 167, 0.45);
+  border: 1px solid rgba(var(--danger-rgb), 0.45);
   border-radius: 8px;
   color: var(--danger);
-  background: rgba(255, 179, 167, 0.08);
+  background: rgba(var(--danger-rgb), 0.08);
   font-size: 13px;
 }
 
@@ -206,31 +284,38 @@ button {
   margin: 14px 18px 10px;
   padding: 20px;
   resize: none;
-  border: 1px solid rgba(216, 180, 93, 0.28);
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
   border-radius: 8px;
   outline: none;
   color: var(--text);
-  background: rgba(17, 16, 12, 0.9);
+  background: rgba(var(--panel-rgb), 0.9);
   font-family: "KaiTi", "STKaiti", "KaiTi_GB2312", "Microsoft YaHei UI", serif;
   font-size: 16px;
   line-height: 1.65;
   animation: editor-glow 5.5s ease-in-out infinite alternate;
+  transition:
+    background 700ms ease,
+    background-color 700ms ease,
+    border-color 700ms ease,
+    color 700ms ease,
+    box-shadow 700ms ease;
 }
 
 .note-editor:focus {
-  border-color: rgba(240, 216, 145, 0.8);
-  box-shadow: 0 0 0 3px rgba(216, 180, 93, 0.12);
+  border-color: rgba(var(--accent-soft-rgb), 0.8);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12);
 }
 
 .note-editor::placeholder {
-  color: rgba(167, 155, 128, 0.66);
+  color: rgba(var(--accent-soft-rgb), 0.56);
   font-family: "KaiTi", "STKaiti", "KaiTi_GB2312", "Microsoft YaHei UI", serif;
 }
 
 .task-list {
   grid-area: tasks;
-  min-height: 76px;
-  max-height: 180px;
+  min-height: 0;
+  max-height: none;
+  height: calc(100% - 8px);
   margin: 0 18px 8px;
   padding: 0;
   overflow: auto;
@@ -252,10 +337,15 @@ button {
   gap: 10px;
   margin: 0 0 8px;
   padding: 10px 12px;
-  border: 1px solid rgba(216, 180, 93, 0.2);
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
   border-radius: 8px;
-  background: rgba(216, 180, 93, 0.06);
+  background: rgba(var(--accent-rgb), 0.06);
   white-space: pre-wrap;
+  transition:
+    background 700ms ease,
+    border-color 700ms ease,
+    color 700ms ease,
+    box-shadow 700ms ease;
 }
 
 .task-item-text {
@@ -269,13 +359,18 @@ button {
   width: 24px;
   height: 24px;
   padding: 0;
-  border: 1px solid rgba(216, 180, 93, 0.3);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
   border-radius: 6px;
   color: var(--gold-soft);
   background: rgba(8, 8, 6, 0.42);
   cursor: pointer;
   font-weight: 700;
   line-height: 1;
+  transition:
+    background 700ms ease,
+    background-color 700ms ease,
+    border-color 700ms ease,
+    color 700ms ease;
 }
 
 .task-delete-button:hover {
@@ -293,6 +388,9 @@ button {
   padding: 10px 18px 16px;
   color: var(--muted);
   font-size: 12px;
+  transition:
+    color 700ms ease,
+    background-color 700ms ease;
 }
 
 .footer-actions {
@@ -308,15 +406,15 @@ button {
 
 @keyframes editor-glow {
   0% {
-    border-color: rgba(216, 180, 93, 0.24);
-    box-shadow: inset 0 0 18px rgba(216, 180, 93, 0.02);
+    border-color: rgba(var(--accent-rgb), 0.24);
+    box-shadow: inset 0 0 18px rgba(var(--accent-rgb), 0.02);
   }
 
   100% {
-    border-color: rgba(240, 216, 145, 0.48);
+    border-color: rgba(var(--accent-soft-rgb), 0.48);
     box-shadow:
-      inset 0 0 22px rgba(216, 180, 93, 0.05),
-      0 0 18px rgba(216, 180, 93, 0.08);
+      inset 0 0 22px rgba(var(--accent-rgb), 0.05),
+      0 0 18px rgba(var(--accent-rgb), 0.08);
   }
 }
 

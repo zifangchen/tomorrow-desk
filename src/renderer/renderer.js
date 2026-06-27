@@ -6,6 +6,7 @@ const archiveButton = document.querySelector("#archiveButton");
 const taskList = document.querySelector("#taskList");
 const topToggle = document.querySelector("#topToggle");
 const loginToggle = document.querySelector("#loginToggle");
+const themeToggle = document.querySelector("#themeToggle");
 const minimizeButton = document.querySelector("#minimizeButton");
 const closeButton = document.querySelector("#closeButton");
 const errorBanner = document.querySelector("#errorBanner");
@@ -14,12 +15,28 @@ const todayLabel = document.querySelector("#todayLabel");
 let saveTimer = null;
 let lastSavedContent = "";
 let taskItems = [];
+let themeIndex = 0;
+
+const THEMES = [
+  { id: "black-gold", label: "Theme", title: "Theme: Black Gold" },
+  { id: "ocean", label: "Ocean", title: "Theme: Ocean Gold" },
+  { id: "forest", label: "Forest", title: "Theme: Forest Gold" },
+  { id: "violet", label: "Violet", title: "Theme: Violet Copper" },
+];
 
 const TASKS_HEADING = "## 待完成事项";
 const DRAFT_HEADING = "## 当前输入";
 
 function setStatus(message) {
   saveStatus.textContent = message;
+}
+
+function applyTheme(nextIndex) {
+  themeIndex = ((nextIndex % THEMES.length) + THEMES.length) % THEMES.length;
+  const theme = THEMES[themeIndex];
+  document.body.dataset.theme = theme.id;
+  themeToggle.textContent = theme.label;
+  themeToggle.title = theme.title;
 }
 
 function showError(message) {
@@ -185,6 +202,8 @@ function applyPreferenceButtons(preferences) {
   loginToggle.classList.toggle("is-active", preferences.launchAtLogin);
 }
 
+applyTheme(0);
+
 async function boot() {
   updateDateLabel();
   try {
@@ -325,6 +344,10 @@ loginToggle.addEventListener("click", async () => {
   } catch (error) {
     showError("Could not update launch-at-login.");
   }
+});
+
+themeToggle.addEventListener("click", () => {
+  applyTheme(themeIndex + 1);
 });
 
 minimizeButton.addEventListener("click", () => {
