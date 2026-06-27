@@ -2,6 +2,7 @@ const editor = document.querySelector("#noteEditor");
 const saveStatus = document.querySelector("#saveStatus");
 const wordCount = document.querySelector("#wordCount");
 const archiveButton = document.querySelector("#archiveButton");
+const taskList = document.querySelector("#taskList");
 const topToggle = document.querySelector("#topToggle");
 const loginToggle = document.querySelector("#loginToggle");
 const minimizeButton = document.querySelector("#minimizeButton");
@@ -11,6 +12,10 @@ const todayLabel = document.querySelector("#todayLabel");
 
 let saveTimer = null;
 let lastSavedContent = "";
+let taskItems = [];
+
+const TASKS_HEADING = "## 待完成事项";
+const DRAFT_HEADING = "## 当前输入";
 
 function setStatus(message) {
   saveStatus.textContent = message;
@@ -32,6 +37,83 @@ function updateWordCount() {
   wordCount.textContent = `${count} ${count === 1 ? "word" : "words"}`;
 }
 
+function escapeHtml(value) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function normalizeTaskItem(value) {
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trimEnd())
+    .join("\n")
+    .trim();
+}
+
+function renderTaskList() {
+  taskList.textContent = taskItems.join("\n");
+  taskList.innerHTML = taskItems
+    .map((item) => `<li>${escapeHtml(item).replace(/\n/g, "<br>")}</li>`)
+    .join("");
+}
+
+function parseMarkdownTasks(markdown) {
+  const items = [];
+  let current = null;
+
+  for (const line of markdown.split(/\r?\n/)) {
+    if (line.startsWith("- ")) {
+      if (current) {
+        items.push(normalizeTaskItem(current.join("\n")));
+      }
+      current = [line.slice(2)];
+      continue;
+    }
+
+    if (current && (line.startsWith("  ") || line.trim() === "")) {
+      current.push(line.replace(/^  /, ""));
+    }
+  }
+
+  if (current) {
+    items.push(normalizeTaskItem(current.join("\n")));
+  }
+
+  return items.filter(Boolean);
+}
+
+function parseNoteState(content) {
+  const note = String(content || "");
+  const tasksIndex = note.indexOf(TASKS_HEADING);
+  const draftIndex = note.indexOf(DRAFT_HEADING);
+
+  if (tasksIndex >= 0 && draftIndex >= 0 && draftIndex > tasksIndex) {
+    const tasksMarkdown = note.slice(tasksIndex + TASKS_HEADING.length, draftIndex);
+    return {
+      items: parseMarkdownTasks(tasksMarkdown),
+      draft: note.slice(draftIndex + DRAFT_HEADING.length).trim(),
+    };
+  }
+
+  return { items: [], draft: note };
+}
+
+function formatTaskItem(item) {
+  const lines = item.split(/\r?\n/);
+  const [first, ...rest] = lines;
+  return [`- ${first}`, ...rest.map((line) => `  ${line}`)].join("\n");
+}
+
+function serializeNote() {
+  const tasksMarkdown = taskItems.map(formatTaskItem).join("\n");
+  const draft = editor.value.trim();
+  return `${TASKS_HEADING}\n\n${tasksMarkdown}\n\n${DRAFT_HEADING}\n\n${draft}`.trimEnd();
+}
+
 function updateDateLabel() {
   const formatter = new Intl.DateTimeFormat(undefined, {
     weekday: "short",
@@ -44,15 +126,16 @@ function updateDateLabel() {
 async function saveNow() {
   clearTimeout(saveTimer);
   saveTimer = null;
-  if (editor.value === lastSavedContent) {
+  const nextContent = serializeNote();
+  if (nextContent === lastSavedContent) {
     setStatus("Saved");
     return;
   }
 
   try {
     setStatus("Saving...");
-    await window.tomorrowDesk.saveNote(editor.value);
-    lastSavedContent = editor.value;
+    await window.tomorrowDesk.saveNote(nextContent);
+    lastSavedContent = nextContent;
     clearError();
     setStatus("Saved");
   } catch (error) {
@@ -82,8 +165,11 @@ async function boot() {
       window.tomorrowDesk.loadNote(),
       window.tomorrowDesk.getPreferences()
     ]);
-    editor.value = note;
-    lastSavedContent = note;
+    const noteState = parseNoteState(note);
+    taskItems = noteState.items;
+    editor.value = noteState.draft;
+    renderTaskList();
+    lastSavedContent = serializeNote();
     updateWordCount();
     applyPreferenceButtons(preferences);
     setStatus("Saved");
@@ -99,6 +185,32 @@ editor.addEventListener("input", () => {
   scheduleSave();
 });
 
+editor.addEventListener("keydown", async (event) => {
+  if (event.key !== "Enter" || event.shiftKey) {
+    return;
+  }
+
+  const item = normalizeTaskItem(editor.value);
+  if (!item) {
+    return;
+  }
+
+  event.preventDefault();
+  taskItems.push(item);
+  editor.value = "";
+  renderTaskList();
+  updateWordCount();
+
+  try {
+    await saveNow();
+  } catch (error) {
+    taskItems.pop();
+    editor.value = item;
+    renderTaskList();
+    updateWordCount();
+  }
+});
+
 archiveButton.addEventListener("click", async () => {
   const shouldArchive = window.confirm("Archive this handoff and clear the editor?");
   if (!shouldArchive) {
@@ -108,11 +220,14 @@ archiveButton.addEventListener("click", async () => {
     await saveNow();
     setStatus("Archiving...");
     await window.tomorrowDesk.archiveNote();
+    taskItems = [];
     editor.value = "";
     lastSavedContent = "";
+    renderTaskList();
     updateWordCount();
     clearError();
     setStatus("Archived");
+    editor.focus();
   } catch (error) {
     showError("Archive failed. The active note was not cleared.");
     setStatus("Archive failed");
@@ -155,11 +270,14 @@ closeButton.addEventListener("click", async () => {
 window.addEventListener("tomorrow-desk:note-archived", () => {
   clearTimeout(saveTimer);
   saveTimer = null;
+  taskItems = [];
   editor.value = "";
   lastSavedContent = "";
+  renderTaskList();
   updateWordCount();
   clearError();
   setStatus("Archived");
+  editor.focus();
 });
 
 window.addEventListener("tomorrow-desk:flush-request", async (event) => {

@@ -9,6 +9,7 @@ function makeElement() {
   return {
     value: "",
     textContent: "",
+    innerHTML: "",
     hidden: false,
     focused: false,
     handlers: {},
@@ -43,6 +44,7 @@ async function runRenderer(overrides = {}) {
     ["#saveStatus", makeElement()],
     ["#wordCount", makeElement()],
     ["#archiveButton", makeElement()],
+    ["#taskList", makeElement()],
     ["#topToggle", makeElement()],
     ["#loginToggle", makeElement()],
     ["#minimizeButton", makeElement()],
@@ -69,7 +71,7 @@ async function runRenderer(overrides = {}) {
     },
     window: {
       tomorrowDesk: {
-        loadNote: async () => "Keep this only until archived",
+        loadNote: overrides.loadNote || (async () => "Keep this only until archived"),
         getPreferences: async () => ({ alwaysOnTop: true, launchAtLogin: true }),
         saveNote,
         archiveNote: async () => {
@@ -112,7 +114,7 @@ async function runRenderer(overrides = {}) {
   return { elements, windowHandlers, savedNotes, archiveCalls, completedFlushes, hiddenToTray };
 }
 
-test("renderer clears the visible note when the main process archives from tray", async () => {
+test("renderer clears the visible note and refocuses editor when the main process archives from tray", async () => {
   const { elements, windowHandlers } = await runRenderer();
   const editor = elements.get("#noteEditor");
   const saveStatus = elements.get("#saveStatus");
@@ -121,6 +123,7 @@ test("renderer clears the visible note when the main process archives from tray"
   assert.equal(editor.value, "Keep this only until archived");
   assert.equal(typeof windowHandlers["tomorrow-desk:note-archived"], "function");
 
+  editor.focused = false;
   windowHandlers["tomorrow-desk:note-archived"]({
     detail: {
       archivedPath: "archive.md",
@@ -131,6 +134,19 @@ test("renderer clears the visible note when the main process archives from tray"
   assert.equal(editor.value, "");
   assert.equal(saveStatus.textContent, "Archived");
   assert.equal(wordCount.textContent, "0 words");
+  assert.equal(editor.focused, true);
+});
+
+test("renderer refocuses editor after archive button clears the note", async () => {
+  const { elements } = await runRenderer();
+  const editor = elements.get("#noteEditor");
+  const archiveButton = elements.get("#archiveButton");
+
+  editor.focused = false;
+  await archiveButton.handlers.click();
+
+  assert.equal(editor.value, "");
+  assert.equal(editor.focused, true);
 });
 
 test("renderer keeps unsaved text and skips archive when pre-archive save fails", async () => {
@@ -151,6 +167,47 @@ test("renderer keeps unsaved text and skips archive when pre-archive save fails"
   assert.equal(saveStatus.textContent, "Archive failed");
 });
 
+test("renderer commits Enter input as a saved task item below the editor", async () => {
+  const { elements, savedNotes } = await runRenderer({ loadNote: async () => "" });
+  const editor = elements.get("#noteEditor");
+  const taskList = elements.get("#taskList");
+
+  editor.value = "完成论文初稿";
+  await editor.handlers.keydown({
+    key: "Enter",
+    shiftKey: false,
+    preventDefault() {
+      this.defaultPrevented = true;
+    },
+  });
+
+  assert.equal(editor.value, "");
+  assert.match(taskList.textContent, /完成论文初稿/);
+  assert.match(savedNotes.at(-1), /- 完成论文初稿/);
+});
+
+test("renderer keeps Shift+Enter available for multiline input", async () => {
+  const { elements, savedNotes } = await runRenderer({ loadNote: async () => "" });
+  const editor = elements.get("#noteEditor");
+  const taskList = elements.get("#taskList");
+  const event = {
+    key: "Enter",
+    shiftKey: true,
+    defaultPrevented: false,
+    preventDefault() {
+      this.defaultPrevented = true;
+    },
+  };
+
+  editor.value = "第一行";
+  await editor.handlers.keydown(event);
+
+  assert.equal(event.defaultPrevented, false);
+  assert.equal(editor.value, "第一行");
+  assert.equal(taskList.textContent, "");
+  assert.deepEqual(savedNotes, []);
+});
+
 test("renderer saves pending text before acknowledging a main-process flush request", async () => {
   const { elements, windowHandlers, savedNotes, completedFlushes } = await runRenderer();
   const editor = elements.get("#noteEditor");
@@ -161,7 +218,9 @@ test("renderer saves pending text before acknowledging a main-process flush requ
     detail: { requestId: "flush-1" },
   });
 
-  assert.deepEqual(savedNotes, ["Flush this before quitting"]);
+  assert.equal(savedNotes.length, 1);
+  assert.match(savedNotes[0], /## 当前输入/);
+  assert.match(savedNotes[0], /Flush this before quitting/);
   assert.equal(completedFlushes.length, 1);
   assert.equal(completedFlushes[0].requestId, "flush-1");
   assert.equal(completedFlushes[0].result.ok, true);

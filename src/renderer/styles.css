@@ -31,7 +31,7 @@ body {
 
 .app-shell {
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto auto minmax(150px, 1fr) auto auto;
   height: 100vh;
   min-width: 360px;
   background:
@@ -136,7 +136,8 @@ button {
 
 .note-editor {
   width: calc(100% - 36px);
-  height: calc(100% - 24px);
+  height: auto;
+  min-height: 150px;
   margin: 14px 18px 10px;
   padding: 20px;
   resize: none;
@@ -145,6 +146,7 @@ button {
   outline: none;
   color: var(--text);
   background: rgba(17, 16, 12, 0.9);
+  font-family: "KaiTi", "STKaiti", "KaiTi_GB2312", "Microsoft YaHei UI", serif;
   font-size: 16px;
   line-height: 1.65;
 }
@@ -156,6 +158,33 @@ button {
 
 .note-editor::placeholder {
   color: rgba(167, 155, 128, 0.66);
+  font-family: "KaiTi", "STKaiti", "KaiTi_GB2312", "Microsoft YaHei UI", serif;
+}
+
+.task-list {
+  min-height: 76px;
+  max-height: 180px;
+  margin: 0 18px 8px;
+  padding: 0;
+  overflow: auto;
+  color: var(--text);
+  font-family: "KaiTi", "STKaiti", "KaiTi_GB2312", "Microsoft YaHei UI", serif;
+  font-size: 15px;
+  line-height: 1.6;
+  list-style: none;
+}
+
+.task-list:empty {
+  display: none;
+}
+
+.task-list li {
+  margin: 0 0 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(216, 180, 93, 0.2);
+  border-radius: 8px;
+  background: rgba(216, 180, 93, 0.06);
+  white-space: pre-wrap;
 }
 
 .statusbar {
