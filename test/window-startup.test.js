@@ -19,21 +19,3 @@ test("main window registers ready-to-show before loading renderer", () => {
     "ready-to-show listener must be registered before loadFile so startup cannot miss the event"
   );
 });
-
-test("main window opens external links in the system browser", () => {
-  const source = fs.readFileSync(
-    path.join(__dirname, "..", "src", "main", "index.js"),
-    "utf8"
-  );
-
-  const handlerIndex = source.indexOf("mainWindow.webContents.setWindowOpenHandler");
-  const loadFileIndex = source.indexOf("await mainWindow.loadFile");
-
-  assert.ok(handlerIndex > -1, "window open handler should exist");
-  assert.ok(source.includes("shell.openExternal(url)"));
-  assert.ok(source.includes("return { action: \"deny\" };"));
-  assert.ok(
-    handlerIndex < loadFileIndex,
-    "external link handler should be registered before renderer loads"
-  );
-});

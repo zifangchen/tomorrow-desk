@@ -87,12 +87,11 @@ body {
 .app-shell {
   position: relative;
   display: grid;
-  grid-template-rows: auto auto 300px auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto 320px minmax(0, 1fr) auto;
   grid-template-areas:
     "titlebar"
     "error"
     "editor"
-    "link"
     "tasks"
     "status";
   height: 100vh;
@@ -312,35 +311,6 @@ button {
   font-family: "KaiTi", "STKaiti", "KaiTi_GB2312", "Microsoft YaHei UI", serif;
 }
 
-.link-input {
-  grid-area: link;
-  width: calc(100% - 36px);
-  height: 42px;
-  margin: 0 18px 12px;
-  padding: 0 14px;
-  border: 1px solid rgba(var(--accent-rgb), 0.24);
-  border-radius: 8px;
-  outline: none;
-  color: var(--text);
-  background: rgba(var(--panel-rgb), 0.82);
-  font-size: 13px;
-  transition:
-    background 700ms ease,
-    background-color 700ms ease,
-    border-color 700ms ease,
-    color 700ms ease,
-    box-shadow 700ms ease;
-}
-
-.link-input:focus {
-  border-color: rgba(var(--accent-soft-rgb), 0.72);
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
-}
-
-.link-input::placeholder {
-  color: rgba(var(--accent-soft-rgb), 0.56);
-}
-
 .task-list {
   grid-area: tasks;
   min-height: 0;
@@ -381,42 +351,6 @@ button {
 .task-item-text {
   min-width: 0;
   overflow-wrap: anywhere;
-}
-
-.task-content {
-  min-width: 0;
-}
-
-.task-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 7px;
-  font-family: "Segoe UI", "Microsoft YaHei UI", Arial, sans-serif;
-  font-size: 12px;
-}
-
-.task-links a {
-  max-width: 100%;
-  padding: 3px 8px;
-  overflow: hidden;
-  border: 1px solid rgba(var(--accent-rgb), 0.22);
-  border-radius: 999px;
-  color: var(--gold-soft);
-  background: rgba(var(--accent-rgb), 0.08);
-  text-decoration: none;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transition:
-    background 700ms ease,
-    border-color 700ms ease,
-    color 700ms ease;
-}
-
-.task-links a:hover {
-  border-color: var(--gold-soft);
-  color: var(--black);
-  background: var(--gold);
 }
 
 .task-delete-button {
