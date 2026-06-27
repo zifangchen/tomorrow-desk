@@ -26,6 +26,7 @@ const THEMES = [
 
 const TASKS_HEADING = "## 待完成事项";
 const DRAFT_HEADING = "## 当前输入";
+const URL_PATTERN = /\b((?:https?:\/\/|www\.)[^\s<>"']+|(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}(?:\/[^\s<>"']*)?)/gi;
 
 function setStatus(message) {
   saveStatus.textContent = message;
@@ -73,6 +74,59 @@ function escapeHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
+function escapeTextWithBreaks(value) {
+  return escapeHtml(value).replace(/\n/g, "<br>");
+}
+
+function splitTrailingPunctuation(value) {
+  let urlText = value;
+  let trailing = "";
+  while (/[),.;!?，。！？、]$/.test(urlText)) {
+    trailing = urlText.at(-1) + trailing;
+    urlText = urlText.slice(0, -1);
+  }
+
+  return { urlText, trailing };
+}
+
+function normalizeUrl(value) {
+  const candidate = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+  try {
+    const url = new URL(candidate);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return "";
+    }
+    return url.href;
+  } catch (error) {
+    return "";
+  }
+}
+
+function linkifyText(value) {
+  const text = String(value || "");
+  let linked = "";
+  let lastIndex = 0;
+
+  for (const match of text.matchAll(URL_PATTERN)) {
+    const rawMatch = match[0];
+    const index = match.index || 0;
+    const { urlText, trailing } = splitTrailingPunctuation(rawMatch);
+    const href = normalizeUrl(urlText);
+
+    linked += escapeTextWithBreaks(text.slice(lastIndex, index));
+    if (href) {
+      linked += `<a class="task-item-link" href="${escapeHtml(href)}" target="_blank" rel="noreferrer">${escapeHtml(urlText)}</a>`;
+      linked += escapeTextWithBreaks(trailing);
+    } else {
+      linked += escapeTextWithBreaks(rawMatch);
+    }
+    lastIndex = index + rawMatch.length;
+  }
+
+  linked += escapeTextWithBreaks(text.slice(lastIndex));
+  return linked;
+}
+
 function normalizeTaskItem(value) {
   return value
     .split(/\r?\n/)
@@ -87,7 +141,7 @@ function renderTaskList() {
     .map(
       (item, index) => `
         <li>
-          <span class="task-item-text">${escapeHtml(item).replace(/\n/g, "<br>")}</span>
+          <span class="task-item-text">${linkifyText(item)}</span>
           <button
             class="task-delete-button"
             type="button"

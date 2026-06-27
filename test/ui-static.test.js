@@ -77,6 +77,16 @@ test("window and task action buttons center their labels", () => {
   assert.match(css, /\.task-delete-button\s*\{[^}]*place-items:\s*center/s);
 });
 
+test("task item links use the app theme styling", () => {
+  const css = fs.readFileSync(
+    path.join(__dirname, "..", "src", "renderer", "styles.css"),
+    "utf8"
+  );
+
+  assert.match(css, /\.task-item-link\s*\{[^}]*color:\s*var\(--gold-soft\)/s);
+  assert.match(css, /\.task-item-link:hover\s*\{[^}]*background:\s*var\(--gold\)/s);
+});
+
 test("main shell includes a subtle animated gradient with reduced-motion fallback", () => {
   const css = fs.readFileSync(
     path.join(__dirname, "..", "src", "renderer", "styles.css"),

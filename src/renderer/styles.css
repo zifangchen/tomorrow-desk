@@ -353,6 +353,23 @@ button {
   overflow-wrap: anywhere;
 }
 
+.task-item-link {
+  color: var(--gold-soft);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(var(--accent-rgb), 0.45);
+  transition:
+    background 700ms ease,
+    border-color 700ms ease,
+    color 700ms ease;
+}
+
+.task-item-link:hover {
+  color: var(--black);
+  background: var(--gold);
+  border-color: var(--gold);
+  border-radius: 4px;
+}
+
 .task-delete-button {
   display: grid;
   place-items: center;

@@ -112,6 +112,7 @@ async function runRenderer(overrides = {}) {
     },
     Intl,
     Date,
+    URL,
     setTimeout,
     clearTimeout,
   };
@@ -199,6 +200,41 @@ test("renderer commits Enter input as a saved task item below the editor", async
   assert.equal(editor.focused, true);
   assert.match(taskList.textContent, /完成论文初稿/);
   assert.match(savedNotes.at(-1), /- 完成论文初稿/);
+});
+
+test("renderer turns urls inside saved task items into clickable links", async () => {
+  const { elements, savedNotes } = await runRenderer({ loadNote: async () => "" });
+  const editor = elements.get("#noteEditor");
+  const taskList = elements.get("#taskList");
+
+  editor.value = "Read https://example.com/docs and example.org/today";
+  await editor.handlers.keydown({
+    key: "Enter",
+    shiftKey: false,
+    preventDefault() {},
+  });
+
+  assert.match(taskList.innerHTML, /href="https:\/\/example\.com\/docs"/);
+  assert.match(taskList.innerHTML, /href="https:\/\/example\.org\/today"/);
+  assert.match(taskList.innerHTML, /target="_blank"/);
+  assert.match(taskList.innerHTML, /rel="noreferrer"/);
+  assert.match(savedNotes.at(-1), /Read https:\/\/example\.com\/docs and example\.org\/today/);
+});
+
+test("renderer does not linkify unsafe protocols and still escapes markup", async () => {
+  const { elements } = await runRenderer({ loadNote: async () => "" });
+  const editor = elements.get("#noteEditor");
+  const taskList = elements.get("#taskList");
+
+  editor.value = "Check javascript:alert(1) <b>later</b>";
+  await editor.handlers.keydown({
+    key: "Enter",
+    shiftKey: false,
+    preventDefault() {},
+  });
+
+  assert.doesNotMatch(taskList.innerHTML, /href="javascript:/);
+  assert.match(taskList.innerHTML, /&lt;b&gt;later&lt;\/b&gt;/);
 });
 
 test("renderer deletes one saved task without clearing the others", async () => {
