@@ -136,7 +136,7 @@ button {
 
 .note-editor {
   width: calc(100% - 36px);
-  height: auto;
+  height: calc(100% - 24px);
   min-height: 150px;
   margin: 14px 18px 10px;
   padding: 20px;

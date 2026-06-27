@@ -21,3 +21,12 @@ test("editor input and placeholder prefer KaiTi typography", () => {
   assert.match(css, /\.note-editor\s*\{[^}]*font-family:\s*"KaiTi"/s);
   assert.match(css, /\.note-editor::placeholder\s*\{[^}]*font-family:\s*"KaiTi"/s);
 });
+
+test("editor stretches to fill the available writing row", () => {
+  const css = fs.readFileSync(
+    path.join(__dirname, "..", "src", "renderer", "styles.css"),
+    "utf8"
+  );
+
+  assert.match(css, /\.note-editor\s*\{[^}]*height:\s*calc\(100% - 24px\)/s);
+});

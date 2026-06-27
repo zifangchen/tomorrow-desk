@@ -1,4 +1,5 @@
 const editor = document.querySelector("#noteEditor");
+const appShell = document.querySelector(".app-shell");
 const saveStatus = document.querySelector("#saveStatus");
 const wordCount = document.querySelector("#wordCount");
 const archiveButton = document.querySelector("#archiveButton");
@@ -29,6 +30,13 @@ function showError(message) {
 function clearError() {
   errorBanner.textContent = "";
   errorBanner.hidden = true;
+}
+
+function focusEditor() {
+  editor.focus();
+  setTimeout(() => {
+    editor.focus();
+  }, 0);
 }
 
 function updateWordCount() {
@@ -173,7 +181,7 @@ async function boot() {
     updateWordCount();
     applyPreferenceButtons(preferences);
     setStatus("Saved");
-    editor.focus();
+    focusEditor();
   } catch (error) {
     showError("Could not load your handoff note.");
     setStatus("Load failed");
@@ -183,6 +191,14 @@ async function boot() {
 editor.addEventListener("input", () => {
   updateWordCount();
   scheduleSave();
+});
+
+appShell.addEventListener("click", (event) => {
+  if (event.target.closest("button, textarea, .titlebar")) {
+    return;
+  }
+
+  focusEditor();
 });
 
 editor.addEventListener("keydown", async (event) => {
@@ -203,11 +219,13 @@ editor.addEventListener("keydown", async (event) => {
 
   try {
     await saveNow();
+    focusEditor();
   } catch (error) {
     taskItems.pop();
     editor.value = item;
     renderTaskList();
     updateWordCount();
+    focusEditor();
   }
 });
 
@@ -227,7 +245,7 @@ archiveButton.addEventListener("click", async () => {
     updateWordCount();
     clearError();
     setStatus("Archived");
-    editor.focus();
+    focusEditor();
   } catch (error) {
     showError("Archive failed. The active note was not cleared.");
     setStatus("Archive failed");
@@ -277,7 +295,7 @@ window.addEventListener("tomorrow-desk:note-archived", () => {
   updateWordCount();
   clearError();
   setStatus("Archived");
-  editor.focus();
+  focusEditor();
 });
 
 window.addEventListener("tomorrow-desk:flush-request", async (event) => {

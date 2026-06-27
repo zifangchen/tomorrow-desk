@@ -40,6 +40,7 @@ async function runRenderer(overrides = {}) {
     "utf8"
   );
   const elements = new Map([
+    [".app-shell", makeElement()],
     ["#noteEditor", makeElement()],
     ["#saveStatus", makeElement()],
     ["#wordCount", makeElement()],
@@ -173,6 +174,7 @@ test("renderer commits Enter input as a saved task item below the editor", async
   const taskList = elements.get("#taskList");
 
   editor.value = "完成论文初稿";
+  editor.focused = false;
   await editor.handlers.keydown({
     key: "Enter",
     shiftKey: false,
@@ -182,6 +184,7 @@ test("renderer commits Enter input as a saved task item below the editor", async
   });
 
   assert.equal(editor.value, "");
+  assert.equal(editor.focused, true);
   assert.match(taskList.textContent, /完成论文初稿/);
   assert.match(savedNotes.at(-1), /- 完成论文初稿/);
 });
@@ -206,6 +209,24 @@ test("renderer keeps Shift+Enter available for multiline input", async () => {
   assert.equal(editor.value, "第一行");
   assert.equal(taskList.textContent, "");
   assert.deepEqual(savedNotes, []);
+});
+
+test("renderer focuses editor when the writing background is clicked", async () => {
+  const { elements } = await runRenderer({ loadNote: async () => "" });
+  const appShell = elements.get(".app-shell");
+  const editor = elements.get("#noteEditor");
+
+  editor.focused = false;
+  appShell.handlers.click({
+    target: {
+      closest(selector) {
+        assert.equal(selector, "button, textarea, .titlebar");
+        return null;
+      },
+    },
+  });
+
+  assert.equal(editor.focused, true);
 });
 
 test("renderer saves pending text before acknowledging a main-process flush request", async () => {
