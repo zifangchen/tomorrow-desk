@@ -34,8 +34,10 @@ function clearError() {
 
 function focusEditor() {
   editor.focus();
+  editor.setSelectionRange(editor.value.length, editor.value.length);
   setTimeout(() => {
     editor.focus();
+    editor.setSelectionRange(editor.value.length, editor.value.length);
   }, 0);
 }
 
@@ -119,6 +121,10 @@ function formatTaskItem(item) {
 function serializeNote() {
   const tasksMarkdown = taskItems.map(formatTaskItem).join("\n");
   const draft = editor.value.trim();
+  if (!tasksMarkdown && !draft) {
+    return "";
+  }
+
   return `${TASKS_HEADING}\n\n${tasksMarkdown}\n\n${DRAFT_HEADING}\n\n${draft}`.trimEnd();
 }
 
@@ -230,25 +236,31 @@ editor.addEventListener("keydown", async (event) => {
 });
 
 archiveButton.addEventListener("click", async () => {
-  const shouldArchive = window.confirm("Archive this handoff and clear the editor?");
-  if (!shouldArchive) {
-    return;
-  }
+  const previousItems = [...taskItems];
+  const previousDraft = editor.value;
+  const previousSavedContent = lastSavedContent;
+
+  taskItems = [];
+  editor.value = "";
+  renderTaskList();
+  updateWordCount();
+  clearError();
+  focusEditor();
+
   try {
+    setStatus("Clearing...");
     await saveNow();
-    setStatus("Archiving...");
-    await window.tomorrowDesk.archiveNote();
-    taskItems = [];
-    editor.value = "";
-    lastSavedContent = "";
-    renderTaskList();
-    updateWordCount();
-    clearError();
-    setStatus("Archived");
+    setStatus("Cleared");
     focusEditor();
   } catch (error) {
-    showError("Archive failed. The active note was not cleared.");
-    setStatus("Archive failed");
+    taskItems = previousItems;
+    editor.value = previousDraft;
+    lastSavedContent = previousSavedContent;
+    renderTaskList();
+    updateWordCount();
+    showError("Clear failed. The active note was not cleared.");
+    setStatus("Clear failed");
+    focusEditor();
   }
 });
 

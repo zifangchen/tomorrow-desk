@@ -12,6 +12,15 @@ test("editor placeholder uses the requested Chinese prompt", () => {
   assert.match(html, /placeholder="请输入待完成事项"/);
 });
 
+test("clear button uses a direct Chinese label", () => {
+  const html = fs.readFileSync(
+    path.join(__dirname, "..", "src", "renderer", "index.html"),
+    "utf8"
+  );
+
+  assert.match(html, /<button id="archiveButton"[^>]*>清空<\/button>/);
+});
+
 test("editor input and placeholder prefer KaiTi typography", () => {
   const css = fs.readFileSync(
     path.join(__dirname, "..", "src", "renderer", "styles.css"),

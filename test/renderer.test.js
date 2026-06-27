@@ -31,6 +31,10 @@ function makeElement() {
     focus() {
       this.focused = true;
     },
+    setSelectionRange(start, end) {
+      this.selectionStart = start;
+      this.selectionEnd = end;
+    },
   };
 }
 
@@ -138,19 +142,24 @@ test("renderer clears the visible note and refocuses editor when the main proces
   assert.equal(editor.focused, true);
 });
 
-test("renderer refocuses editor after archive button clears the note", async () => {
-  const { elements } = await runRenderer();
+test("renderer clear button clears without archiving and places cursor in editor", async () => {
+  const { elements, archiveCalls, savedNotes } = await runRenderer();
   const editor = elements.get("#noteEditor");
   const archiveButton = elements.get("#archiveButton");
 
+  editor.value = "Clear this draft";
   editor.focused = false;
   await archiveButton.handlers.click();
 
   assert.equal(editor.value, "");
+  assert.equal(archiveCalls.length, 0);
+  assert.equal(savedNotes.at(-1), "");
   assert.equal(editor.focused, true);
+  assert.equal(editor.selectionStart, 0);
+  assert.equal(editor.selectionEnd, 0);
 });
 
-test("renderer keeps unsaved text and skips archive when pre-archive save fails", async () => {
+test("renderer keeps unsaved text when clear save fails", async () => {
   const { elements, archiveCalls } = await runRenderer({
     saveNote: async () => {
       throw new Error("disk full");
@@ -165,7 +174,7 @@ test("renderer keeps unsaved text and skips archive when pre-archive save fails"
 
   assert.equal(editor.value, "This must stay visible");
   assert.equal(archiveCalls.length, 0);
-  assert.equal(saveStatus.textContent, "Archive failed");
+  assert.equal(saveStatus.textContent, "Clear failed");
 });
 
 test("renderer commits Enter input as a saved task item below the editor", async () => {
