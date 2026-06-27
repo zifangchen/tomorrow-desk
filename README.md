@@ -1,10 +1,15 @@
-# Tomorrow Desk ### 睡前写下明天第一件事，开机后自动浮到桌面
+<div align="center">
+  <h1>Tomorrow Desk</h1>
+  <p><strong>请睡前的你给明天的自己规划待做任务</strong></p>
 
-[![Electron](https://img.shields.io/badge/Electron-42.5-47848F?style=flat-square&logo=electron&logoColor=white)](https://www.electronjs.org/)
-[![Windows](https://img.shields.io/badge/Windows-Desktop-0078D4?style=flat-square&logo=windows&logoColor=white)](https://www.microsoft.com/windows)
-[![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/Tests-node--test-111827?style=flat-square&logo=githubactions&logoColor=white)](#-开发与验证)
-[![Theme](https://img.shields.io/badge/Theme-Black%20%2B%20Gold-D8B45D?style=flat-square)](#-核心能力)
+  <p>
+    <a href="https://www.electronjs.org/"><img alt="Electron" src="https://img.shields.io/badge/Electron-42.5-47848F?style=flat-square&logo=electron&logoColor=white"></a>
+    <a href="https://www.microsoft.com/windows"><img alt="Windows" src="https://img.shields.io/badge/Windows-Desktop-0078D4?style=flat-square&logo=windows&logoColor=white"></a>
+    <a href="https://nodejs.org/"><img alt="Node.js" src="https://img.shields.io/badge/Node.js-20%2B-339933?style=flat-square&logo=nodedotjs&logoColor=white"></a>
+    <a href="#-开发与验证"><img alt="Tests" src="https://img.shields.io/badge/Tests-node--test-111827?style=flat-square&logo=githubactions&logoColor=white"></a>
+    <a href="#-核心能力"><img alt="Theme" src="https://img.shields.io/badge/Theme-Black%20%2B%20Gold-D8B45D?style=flat-square"></a>
+  </p>
+</div>
 
 Tomorrow Desk 是一个极简 Windows 桌面待办应用：睡前把第二天要做的事情写进去，第二天登录 Windows 后，它会自动启动并把待办事项浮在桌面上。
 
@@ -18,16 +23,16 @@ Tomorrow Desk 是一个极简 Windows 桌面待办应用：睡前把第二天要
 
 | 能力 | 说明 |
 |---|---|
-| **开机即见** | 支持 Windows 登录后自动启动，打开后直接显示上次保存的待办内容 |
-| **桌面悬浮** | 默认置顶，可通过 `Top` 按钮开关，适合做早晨第一眼提醒 |
-| **本地自动保存** | 输入内容保存在本机 Electron user data 目录，不依赖网络和账号 |
-| **分条待办** | 在输入框写事项后按 `Enter` 固定成一条任务，显示在输入框下方 |
-| **多行输入** | 输入框内换行使用 `Shift + Enter`，避免和固定任务冲突 |
-| **单条删除** | 每条任务右侧都有删除按钮，不必一次清空全部内容 |
-| **一键清空** | `清空` 会清除当前输入和任务列表，并自动把光标放回输入框 |
-| **黑金默认主题** | 默认黑金配色，顶栏 `Theme` 可切换 Ocean、Forest、Violet 等主题 |
-| **托盘常驻** | 关闭窗口时隐藏到系统托盘，托盘菜单支持 Show、Archive、Quit |
-| **Windows 打包** | 支持生成安装包、便携版和 `win-unpacked` 免安装目录 |
+| 🌅 **开机即见** | 支持 Windows 登录后自动启动，打开后直接显示上次保存的待办内容 |
+| 📌 **桌面悬浮** | 默认置顶，可通过 `Top` 按钮开关，适合做早晨第一眼提醒 |
+| 💾 **本地自动保存** | 输入内容保存在本机 Electron user data 目录，不依赖网络和账号 |
+| ✅ **分条待办** | 在输入框写事项后按 `Enter` 固定成一条任务，显示在输入框下方 |
+| ↩️ **多行输入** | 输入框内换行使用 `Shift + Enter`，避免和固定任务冲突 |
+| 🧹 **单条删除** | 每条任务右侧都有删除按钮，不必一次清空全部内容 |
+| 🗑️ **一键清空** | `清空` 会清除当前输入和任务列表，并自动把光标放回输入框 |
+| ✨ **黑金默认主题** | 默认黑金配色，顶栏 `Theme` 可切换 Ocean、Forest、Violet 等主题 |
+| 🪟 **托盘常驻** | 关闭窗口时隐藏到系统托盘，托盘菜单支持 Show、Archive、Quit |
+| 📦 **Windows 打包** | 支持生成安装包、便携版和 `win-unpacked` 免安装目录 |
 
 > [!TIP]
 > 想实现“开机后立刻看到待办事项”，请保持右上角 `Login` 和 `Top` 都处于高亮状态。
