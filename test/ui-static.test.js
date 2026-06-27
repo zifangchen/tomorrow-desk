@@ -40,6 +40,19 @@ test("editor stretches to fill the available writing row", () => {
   assert.match(css, /\.note-editor\s*\{[^}]*height:\s*calc\(100% - 24px\)/s);
 });
 
+test("main layout pins the status bar to the bottom grid area", () => {
+  const css = fs.readFileSync(
+    path.join(__dirname, "..", "src", "renderer", "styles.css"),
+    "utf8"
+  );
+
+  assert.match(css, /grid-template-areas:[^;]*"titlebar"[^;]*"status"/s);
+  assert.match(css, /\.titlebar\s*\{[^}]*grid-area:\s*titlebar/s);
+  assert.match(css, /\.note-editor\s*\{[^}]*grid-area:\s*editor/s);
+  assert.match(css, /\.task-list\s*\{[^}]*grid-area:\s*tasks/s);
+  assert.match(css, /\.statusbar\s*\{[^}]*grid-area:\s*status/s);
+});
+
 test("window and task action buttons center their labels", () => {
   const css = fs.readFileSync(
     path.join(__dirname, "..", "src", "renderer", "styles.css"),
@@ -60,6 +73,17 @@ test("main shell includes a subtle animated gradient with reduced-motion fallbac
   );
 
   assert.match(css, /\.app-shell::before\s*\{[^}]*animation:\s*aurora-drift/s);
+  assert.match(css, /\.note-editor\s*\{[^}]*animation:\s*editor-glow/s);
   assert.match(css, /@keyframes\s+aurora-drift/);
+  assert.match(css, /@keyframes\s+editor-glow/);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
+});
+
+test("top window symbols are visually larger than text toggles", () => {
+  const css = fs.readFileSync(
+    path.join(__dirname, "..", "src", "renderer", "styles.css"),
+    "utf8"
+  );
+
+  assert.match(css, /#minimizeButton,\s*#closeButton\s*\{[^}]*font-size:\s*16px/s);
 });
