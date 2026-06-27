@@ -39,3 +39,27 @@ test("editor stretches to fill the available writing row", () => {
 
   assert.match(css, /\.note-editor\s*\{[^}]*height:\s*calc\(100% - 24px\)/s);
 });
+
+test("window and task action buttons center their labels", () => {
+  const css = fs.readFileSync(
+    path.join(__dirname, "..", "src", "renderer", "styles.css"),
+    "utf8"
+  );
+
+  assert.match(css, /\.icon-button\s*\{[^}]*display:\s*grid/s);
+  assert.match(css, /\.icon-button\s*\{[^}]*place-items:\s*center/s);
+  assert.match(css, /\.icon-button\s*\{[^}]*font-weight:\s*700/s);
+  assert.match(css, /\.task-delete-button\s*\{[^}]*display:\s*grid/s);
+  assert.match(css, /\.task-delete-button\s*\{[^}]*place-items:\s*center/s);
+});
+
+test("main shell includes a subtle animated gradient with reduced-motion fallback", () => {
+  const css = fs.readFileSync(
+    path.join(__dirname, "..", "src", "renderer", "styles.css"),
+    "utf8"
+  );
+
+  assert.match(css, /\.app-shell::before\s*\{[^}]*animation:\s*aurora-drift/s);
+  assert.match(css, /@keyframes\s+aurora-drift/);
+  assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
+});

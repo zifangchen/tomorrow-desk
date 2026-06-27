@@ -30,13 +30,58 @@ body {
 }
 
 .app-shell {
+  position: relative;
   display: grid;
   grid-template-rows: auto auto minmax(150px, 1fr) auto auto;
   height: 100vh;
   min-width: 360px;
+  overflow: hidden;
   background:
-    linear-gradient(180deg, rgba(216, 180, 93, 0.08), transparent 36%),
+    linear-gradient(180deg, rgba(216, 180, 93, 0.1), transparent 38%),
     var(--black);
+}
+
+.app-shell::before {
+  content: "";
+  position: absolute;
+  inset: -35%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      115deg,
+      transparent 8%,
+      rgba(216, 180, 93, 0.12) 34%,
+      rgba(240, 216, 145, 0.05) 46%,
+      transparent 62%
+    ),
+    linear-gradient(
+      245deg,
+      transparent 18%,
+      rgba(143, 119, 65, 0.1) 42%,
+      transparent 64%
+    );
+  background-size: 180% 180%;
+  opacity: 0.68;
+  transform: translate3d(-2%, -2%, 0);
+  animation: aurora-drift 18s ease-in-out infinite alternate;
+}
+
+.app-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes aurora-drift {
+  0% {
+    background-position: 0% 40%, 100% 50%;
+    transform: translate3d(-2%, -2%, 0);
+  }
+
+  100% {
+    background-position: 100% 58%, 0% 44%;
+    transform: translate3d(2%, 1%, 0);
+  }
 }
 
 .titlebar {
@@ -107,10 +152,14 @@ button {
 }
 
 .icon-button {
+  display: grid;
+  place-items: center;
   min-width: 36px;
   height: 30px;
   padding: 0 8px;
   font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .icon-button.is-active {
@@ -197,13 +246,17 @@ button {
 }
 
 .task-delete-button {
+  display: grid;
+  place-items: center;
   width: 24px;
   height: 24px;
+  padding: 0;
   border: 1px solid rgba(216, 180, 93, 0.3);
   border-radius: 6px;
   color: var(--gold-soft);
   background: rgba(8, 8, 6, 0.42);
   cursor: pointer;
+  font-weight: 700;
   line-height: 1;
 }
 
@@ -232,4 +285,11 @@ button {
 .archive-button {
   padding: 8px 11px;
   color: var(--gold-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell::before {
+    animation: none;
+    transform: none;
+  }
 }
