@@ -2,14 +2,47 @@
   "name": "tomorrow-desk",
   "version": "0.1.0",
   "description": "A black-and-gold desktop handoff note that floats back after login.",
+  "author": "Local",
   "main": "src/main/index.js",
   "private": true,
   "type": "commonjs",
   "scripts": {
     "start": "electron .",
-    "test": "node --test"
+    "test": "node --test",
+    "prepare:assets": "node scripts/create-icon.js",
+    "pack": "npm run prepare:assets && electron-builder --dir",
+    "dist:win": "npm run prepare:assets && electron-builder --win nsis portable"
   },
   "devDependencies": {
-    "electron": "^31.7.7"
+    "electron": "^42.5.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "local.tomorrow-desk.app",
+    "productName": "Tomorrow Desk",
+    "asar": true,
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Tomorrow Desk"
+    }
   }
 }
